@@ -2,44 +2,51 @@ package com.udacity.sandwichclub.utils;
 
 import com.udacity.sandwichclub.model.Sandwich;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class JsonUtils {
-    //{
-//        "name":{
-//        "mainName":"Ham and cheese sandwich",
-//        "alsoKnownAs":[
-//        ]
-//        },
-//        "placeOfOrigin":"",
-//        "description":"A ham and cheese sandwich is a common type of sandwich. It is made by putting cheese and sliced ham between two slices of bread. The bread is sometimes buttered and/or toasted. Vegetables like lettuce, tomato, onion or pickle slices can also be included. Various kinds of mustard and mayonnaise are also common.",
-//        "image":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Grilled_ham_and_cheese_014.JPG/800px-Grilled_ham_and_cheese_014.JPG",
-//        "ingredients":[
-//        "Sliced bread",
-//        "Cheese",
-//        "Ham"
-//        ]
-//        }
-// private String mainName;
-//private List<String> alsoKnownAs = null;
-//private String placeOfOrigin;
-//private String description;
-//private String image;
-//private List<String> ingredients = null;
-  //  https://github.com/udacity/ud851-Sunshine/blob/3299888110b4292cf89ca1f6c0b5036cf1c364bc/app/src/main/java/com/example/android/sunshine/utilities/OpenWeatherJsonUtils.java
+
+    private static final String NAME = "name";
+    private static final String MAIN_NAME = "mainName";
+    private static final String PLACE_OF_ORIGIN = "placeOfOrigin";
+    private static final String DESCRIPTION = "description";
+    private static final String IMAGE = "image";
+    private static final String INGREDIENTS = "ingredients";
+    private static final String ALSO_KNOWN_AS = "alsoKnownAs";
+
     public static Sandwich parseSandwichJson(String json) {
-        JSONObject sandwichJson = null;
-        String mainName = null;
         try {
-            sandwichJson = new JSONObject(json);
-            JSONObject nameJson = sandwichJson.getJSONObject("name");
-            mainName = nameJson.getString("mainName");
+            JSONObject sandwichJson = new JSONObject(json);
+
+            JSONObject nameObject = sandwichJson.getJSONObject(NAME);
+            String mainName = nameObject.getString(MAIN_NAME);
+            JSONArray alsoKnownAsArray = nameObject.getJSONArray(ALSO_KNOWN_AS);
+            List<String> alsoKnownAs = parseJsonArrayAsStringList(alsoKnownAsArray);
+
+            String placeOfOrigin = sandwichJson.getString(PLACE_OF_ORIGIN);
+            String description = sandwichJson.getString(DESCRIPTION);
+            String image = sandwichJson.getString(IMAGE);
+
+            JSONArray ingredientsJson = sandwichJson.getJSONArray(INGREDIENTS);
+            List<String> ingredients = parseJsonArrayAsStringList(ingredientsJson);
+
+            return new Sandwich(mainName, alsoKnownAs, placeOfOrigin, description, image, ingredients);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
+    }
 
-
-        return new Sandwich(mainName, null, null, null, null, null);
+    private static List<String> parseJsonArrayAsStringList(JSONArray jsonArray) throws JSONException {
+        List<String> stringList = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            stringList.add(jsonArray.getString(i));
+        }
+        return stringList;
     }
 }
